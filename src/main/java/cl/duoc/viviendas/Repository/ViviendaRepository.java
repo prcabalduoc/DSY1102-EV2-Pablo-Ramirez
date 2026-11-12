@@ -1,25 +1,29 @@
 package cl.duoc.viviendas.Repository;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import cl.duoc.viviendas.DAO.ViviendaDAO;
 import cl.duoc.viviendas.model.Casa;
 import cl.duoc.viviendas.model.Departamento;
 import cl.duoc.viviendas.model.Vivienda;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ViviendaRepository {
     private final ViviendaDAO dao;
-    private final ObservableList<Vivienda> listaViviendas;
+    private final List<Vivienda> viviendas;
 
     public ViviendaRepository() {
         this.dao = new ViviendaDAO();
-        this.listaViviendas = FXCollections.observableArrayList();
+        this.viviendas = new ArrayList<>();
     }
 
-    public ObservableList<Vivienda> getListaViviendas() {
-        return listaViviendas;
+    /**
+     * Entrega una copia de solo lectura del estado del repositorio.
+     * La conversión a colecciones propias de la interfaz gráfica corresponde
+     * al controlador, no a la capa de persistencia.
+     */
+    public List<Vivienda> obtenerViviendas() {
+        return List.copyOf(viviendas);
     }
 
     public void cargarDatos() {
@@ -27,9 +31,9 @@ public class ViviendaRepository {
         List<Departamento> depto = dao.cargarDepartamentos();
 
         // La lista visible solo cambia si ambos archivos se leyeron correctamente.
-        listaViviendas.clear();
-        listaViviendas.addAll(casas);
-        listaViviendas.addAll(depto);
+        viviendas.clear();
+        viviendas.addAll(casas);
+        viviendas.addAll(depto);
     }
 
     public void agregarVivienda(Vivienda vivienda) {
@@ -47,7 +51,7 @@ public class ViviendaRepository {
             throw new IllegalArgumentException("Tipo de vivienda no soportado.");
         }
 
-        listaViviendas.add(vivienda);
+        viviendas.add(vivienda);
     }
 
     public void eliminarVivienda(Vivienda vivienda) {
@@ -63,12 +67,12 @@ public class ViviendaRepository {
             throw new IllegalArgumentException("Tipo de vivienda no soportado.");
         }
 
-        listaViviendas.remove(vivienda);
+        viviendas.remove(vivienda);
     }
 
     private List<Casa> obtenerCasas() {
-        List<Casa> casas = new java.util.ArrayList<>();
-        for (Vivienda v : listaViviendas) {
+        List<Casa> casas = new ArrayList<>();
+        for (Vivienda v : viviendas) {
             if (v instanceof Casa casa) {
                 casas.add(casa);
             }
@@ -77,8 +81,8 @@ public class ViviendaRepository {
     }
 
     private List<Departamento> obtenerDepartamentos() {
-        List<Departamento> departamentos = new java.util.ArrayList<>();
-        for (Vivienda v : listaViviendas) {
+        List<Departamento> departamentos = new ArrayList<>();
+        for (Vivienda v : viviendas) {
             if (v instanceof Departamento departamento) {
                 departamentos.add(departamento);
             }

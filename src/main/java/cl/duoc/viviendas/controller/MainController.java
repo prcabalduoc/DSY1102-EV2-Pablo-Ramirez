@@ -1,6 +1,7 @@
 package cl.duoc.viviendas.controller;
 
 import javafx.fxml.FXML;
+import javafx.collections.FXCollections;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.paint.Color;
@@ -60,9 +61,10 @@ public class MainController {
         });
         // Vincular la tabla antes de cargar, para que también pueda iniciar
         // vacía y mostrar un mensaje si alguno de los archivos tiene errores.
-        tablaViviendas.setItems(repository.getListaViviendas());
+        tablaViviendas.setItems(FXCollections.observableArrayList());
         try {
             repository.cargarDatos();
+            actualizarTabla();
         } catch (PersistenciaException e) {
             mostrarMensaje(e.getMessage(), true);
         }
@@ -145,6 +147,7 @@ public class MainController {
                 }
 
                 repository.agregarVivienda(depto);
+                actualizarTabla();
                 mostrarMensaje(codigo + " (Departamento) registrada correctamente.", false);
 
             } else {
@@ -152,6 +155,7 @@ public class MainController {
                 Casa casa = new Casa(codigo, superficie, habitaciones, tienePatio);
 
                 repository.agregarVivienda(casa);
+                actualizarTabla();
                 mostrarMensaje(codigo + " (Casa) registrada correctamente.", false);
             }
 
@@ -175,6 +179,7 @@ public class MainController {
 
         try {
             repository.eliminarVivienda(seleccionada);
+            actualizarTabla();
             mostrarMensaje("Vivienda " + seleccionada.getCodigo() + " eliminada correctamente.", false);
         } catch (PersistenciaException e) {
             mostrarMensaje(e.getMessage(), true);
@@ -188,6 +193,11 @@ public class MainController {
         } else {
             lblMensaje.setTextFill(Color.GREEN);
         }
+    }
+
+    /** Adapta el modelo Java del repositorio a la colección observable de JavaFX. */
+    private void actualizarTabla() {
+        tablaViviendas.getItems().setAll(repository.obtenerViviendas());
     }
 
     private void limpiarFormulario() {
